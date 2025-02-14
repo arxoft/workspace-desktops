@@ -1,0 +1,46 @@
+#!/bin/bash
+
+CURRENT=$(wmctrl -d | grep '*' | cut -d ' ' -f 1)
+DESKTOPS="$HOME/.desktops/.desktops-$1"
+ACTIVE="$DESKTOPS/Desktop-$CURRENT"
+CURRENT_LINK=$(readlink "$HOME/Desktop")
+LOG="$HOME/Scripts/desktop.log"
+
+echo >> $LOG
+echo >> $LOG
+echo >> $LOG
+echo "$1"                      >> $LOG
+echo "HOME: $HOME"             >> $LOG
+echo "CURRENT: $CURRENT"       >> $LOG
+echo "ACTIVE: $ACTIVE"         >> $LOG
+echo
+
+if [ ! -d "$ACTIVE" ]; then
+    echo "Creating $ACTIVE" >> $LOG
+    mkdir -p "$ACTIVE"
+fi
+
+if [ "$CURRENT_LINK" == "$ACTIVE" ]; then
+    echo "Desktop #$CURRENT already active. Aborting." >> $LOG
+    exit 0
+fi
+
+echo "Activating Desktop #$CURRENT" >> $LOG
+if [ -d "$HOME/Desktop" ] && [ ! -L "$HOME/Desktop" ]; then
+    rm -r "$HOME/Desktop"
+fi
+
+ln -sfn $ACTIVE "$HOME/Desktop"
+
+echo
+echo 'Restarting nemo-desktop...'  >> $LOG
+echo
+echo
+nemo-desktop --quit
+nemo-desktop &
+sleep 1
+echo
+echo
+
+# Disown the Nemo process to allow the script to exit
+disown

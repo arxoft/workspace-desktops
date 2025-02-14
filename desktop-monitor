@@ -1,0 +1,37 @@
+#!/bin/bash
+
+
+LOCKFILE="/tmp/desktop-monitor.$USER.lock"
+
+# Check if the lock file exists
+if [ -e "$LOCKFILE" ]; then
+    echo "Another instance of the script is already running. Exiting."
+    exit 1
+fi
+
+# Create the lock file to indicate that the script is running
+touch "$LOCKFILE"
+
+# Make sure the lock file is removed when the script exits, even if it crashes
+trap 'rm -f "$LOCKFILE"' EXIT
+
+
+
+
+
+
+
+
+
+
+CURRENT=$(wmctrl -d | grep '*' | cut -d ' ' -f 1)
+while true; do
+    NEW=$(wmctrl -d | grep '*' | cut -d ' ' -f 1)
+    if [ "$NEW" != "$CURRENT" ]; then
+        ~/Scripts/desktop-switcher $USER
+        CURRENT=$NEW
+        echo "Current: $NEW"
+    fi
+    sleep 1
+done
+
