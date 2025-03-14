@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Define the process path
+PROCESS_PATH="/home/$USER/Workspaces/workspace-desktops/desktop-monitor"
+
+# Find the process ID (PID)
+PID=$(pgrep -f "$PROCESS_PATH")
+
+# If the process exists, kill it
+if [[ -n "$PID" ]]; then
+    echo "Killing process $PID ($PROCESS_PATH)..."
+    kill "$PID"
+    sleep 1  # Give it time to terminate
+    # Ensure the process is killed
+    if ps -p "$PID" > /dev/null; then
+        echo "Process is still running, forcing kill..."
+        kill -9 "$PID"
+    fi
+else
+    echo "No process found for $PROCESS_PATH"
+fi
+
+# Remove the lock file
+LOCK_FILE="/tmp/desktop-monitor.$USER.lock"
+if [[ -f "$LOCK_FILE" ]]; then
+    echo "Removing lock file: $LOCK_FILE"
+    rm "$LOCK_FILE"
+else
+    echo "Lock file not found: $LOCK_FILE"
+fi
+
+# Run cinnamon settings startup
+echo "Opening Cinnamon startup settings..."
+cinnamon-settings startup &
